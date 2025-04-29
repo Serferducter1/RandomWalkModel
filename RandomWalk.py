@@ -109,47 +109,46 @@ array_twos = array_ones.copy()
 normalize(array_ones)
 normalize(array_twos)
 pop_grow = log_growth(0.5, 1, 1)
+walk_func = lambda x: x*x 
+plot_3d_animation(array_ones, steps = 35)
 
+# n = 1500
+# coeff_one = 0.99
+# coeff_two = 0.01
+# max_iterations = 1000  # Set a maximum number of iterations
+# iteration = 0
 
+# while coeff_one > coeff_two and iteration < max_iterations:
+#     walk_func = lambda x: x - coeff_one if x > coeff_one else coeff_one * x
+#     walk_func1 = lambda x: x - coeff_two if x > coeff_two else coeff_two * x
 
-n = 1500
-coeff_one = 0.99
-coeff_two = 0.01
-max_iterations = 1000  # Set a maximum number of iterations
-iteration = 0
+#     while array_ones.sum() < n and array_twos.sum() < n:
+#         increment(array_ones, pop_grow, walk_func)
+#         increment(array_twos, pop_grow, walk_func1)
 
-while coeff_one > coeff_two and iteration < max_iterations:
-    walk_func = lambda x: x - coeff_one if x > coeff_one else coeff_one * x
-    walk_func1 = lambda x: x - coeff_two if x > coeff_two else coeff_two * x
+#     if array_ones.sum() > n and array_twos.sum() > n:
+#         if array_ones.sum() > array_twos.sum():
+#             print("Walk1")
+#             coeff_two += 0.01
+#             print(coeff_two)
+#         else:
+#             print("Walk2")
+#             coeff_one -= 0.01
+#             print(coeff_one)
+#     elif array_ones.sum() > n and array_twos.sum() < n:
+#         print("Walk1")
+#         coeff_two += 0.01
+#         print(coeff_two)
+#     elif array_ones.sum() < n and array_twos.sum() > n:
+#         print("Walk2")
+#         coeff_one -= 0.01
+#         print(coeff_one)
 
-    while array_ones.sum() < n and array_twos.sum() < n:
-        increment(array_ones, pop_grow, walk_func)
-        increment(array_twos, pop_grow, walk_func1)
+#     iteration += 1
 
-    if array_ones.sum() > n and array_twos.sum() > n:
-        if array_ones.sum() > array_twos.sum():
-            print("Walk1")
-            coeff_two += 0.01
-            print(coeff_two)
-        else:
-            print("Walk2")
-            coeff_one -= 0.01
-            print(coeff_one)
-    elif array_ones.sum() > n and array_twos.sum() < n:
-        print("Walk1")
-        coeff_two += 0.01
-        print(coeff_two)
-    elif array_ones.sum() < n and array_twos.sum() > n:
-        print("Walk2")
-        coeff_one -= 0.01
-        print(coeff_one)
+# if iteration == max_iterations:
+#     print("Terminated due to reaching maximum iterations.")
+#     print(coeff_one, coeff_two)
+# else:
+#     print(coeff_one)
 
-    iteration += 1
-
-if iteration == max_iterations:
-    print("Terminated due to reaching maximum iterations.")
-    print(coeff_one, coeff_two)
-else:
-    print(coeff_one)
-
-print("helloworld")
