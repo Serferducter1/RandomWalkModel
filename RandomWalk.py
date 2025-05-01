@@ -4,6 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import math
+from timeit import timeit
+from concurrent.futures import ThreadPoolExecutor
+from mpl_toolkits.mplot3d import Axes3D
 """
 Created on Wed Sep 25 10:25:14 2024
 
@@ -45,36 +48,34 @@ def plot_3d_animation(initial_grid, steps=50):
     # Save animation as MP4
     anim.save('grid_evolution.mp4', writer='ffmpeg')
     plt.show()
-from timeit import timeit
-from concurrent.futures import ThreadPoolExecutor
-from mpl_toolkits.mplot3d import Axes3D
-def time_my_code():
-    print(timeit(stmt=code, setup=preCode, number=10000))
 
 def increment(grid, growth_function, walk_function):
     def logistic_growth():
-        for element in np.nditer(grid, op_flags=['readwrite']):
-            element[...] += growth_function(element)
+        growth_grid = growth_function(grid)
+        return growth_grid
+        # for element in np.nditer(grid, op_flags=['readwrite']):
+        #     element[...] += growth_function(element)
 
     def walk_grid():
         walk(grid, walk_function)
-
-    with ThreadPoolExecutor() as executor:
-        executor.submit(logistic_growth)
-        executor.submit(walk_grid)
+    walk_grid()
+    grid += logistic_growth()
     #print(np.sum(grid))
     return grid
 # want this to eventually take in two lambda functions
 
-def walk(grid, walkfunction):
-    grid_copy = np.copy(grid)
-    for (i, j), value in np.ndenumerate(grid):
-        grid_copy[i, j] = walkfunction(value*0.9)
+def walk(grid, walk_function):
+    # grid_copy = np.copy(grid)
+    # for (i, j), value in np.ndenumerate(grid):
+    #     grid_copy[i, j] = walkfunction(value)
+    grid_donating = walk_function(grid) #change the var name!
     for (i, j), value in np.ndenumerate(grid):
         L = adj(grid, i, j)
         for neighbor in L:
-            grid[i, j] += (grid_copy[neighbor[0], neighbor[1]] / len(adj(grid, neighbor[0], neighbor[1])))
-    grid -= grid_copy
+            grid[i, j] += (grid_donating[neighbor[0], neighbor[1]] / len(adj(grid, neighbor[0], neighbor[1])))
+            #each grid cell gets a fraction of the walk function value of its neighbors, 
+            # where the fraction is proportional to how many neighbors the neighbor has
+    grid -= grid_donating
     return grid  # Return the updated grid
 
 def adj(grid, x, y):
@@ -103,24 +104,38 @@ def normalize(grid):
     return grid
 
 array_ones = np.ones((40, 40))
+#creates 40x40 grid
 for (i, j), value in np.ndenumerate(array_ones):
     array_ones[i, j] = np.random.uniform(0, 1)
-array_twos = array_ones.copy()
-normalize(array_ones)
-normalize(array_twos)
-pop_grow = log_growth(0.5, 1, 1)
-walk_func = lambda x: x*x 
-plot_3d_animation(array_ones, steps = 35)
+    #assigns random values to each cell
+    if(i > 20):
+        array_ones[i, j] = 0
+    #gives a lower half of the grid 0 for assymetry
+    if(j > 20):
+        array_ones[i, j] = 2
+    #gives a right half of the grid 2 for assymmetry
+#array_twos = array_ones.copy()
+normalize(array_ones) # normalizes grid entries to sum to 1, so each can represent a density
+#normalize(array_twos)
+pop_grow = log_growth(0.5, 1, 1) # defines logistic growth function with growth rate 0.5 and carrying capacity 1 per cell
+walk_func = lambda x: x*x # defines a migration function that is quadratic in the density, evenly spread out amongst neighbors
+plot_3d_animation(array_ones, steps = 200) #animation with 100 increments
 
-# n = 1500
+#Baby Optimization, trying to find best coefficients for a predetermined function shape
+#e.g finding best coefficient for a linear walk function, quadratic, etc. 
+#need to find a way to generalize the optimization process to multiple parameters. 
+#Target Total Population(in terms of original)
+# n = 200 
 # coeff_one = 0.99
 # coeff_two = 0.01
 # max_iterations = 1000  # Set a maximum number of iterations
 # iteration = 0
 
+#checks to see if either increments have reached the target sum
+
 # while coeff_one > coeff_two and iteration < max_iterations:
-#     walk_func = lambda x: x - coeff_one if x > coeff_one else coeff_one * x
-#     walk_func1 = lambda x: x - coeff_two if x > coeff_two else coeff_two * x
+#     walk_func = lambda x: x * coeff_one 
+#     walk_func1 = lambda x: x * coeff_two 
 
 #     while array_ones.sum() < n and array_twos.sum() < n:
 #         increment(array_ones, pop_grow, walk_func)
